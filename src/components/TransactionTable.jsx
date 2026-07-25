@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Edit2, Trash2, CheckCircle, FileSpreadsheet, PlusCircle, StickyNote } from "lucide-react";
-import { formatRupiah, exportToCSV } from "../utils/exportUtils";
+import { Edit2, Trash2, CheckCircle, StickyNote, Calendar } from "lucide-react";
+import { formatRupiah } from "../utils/exportUtils";
 
 export function TransactionTable({
   monthData,
@@ -8,7 +8,6 @@ export function TransactionTable({
   onEditTransaction,
   onDeleteTransaction,
   onQuickToggleLunas,
-  onAddRow,
   onUpdateCatatan
 }) {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -18,12 +17,11 @@ export function TransactionTable({
 
   const transactions = monthData.transactions || [];
 
-  // Summary totals
+  // Automatic calculation summaries
   const totalPrice = transactions.reduce((acc, item) => acc + (Number(item.price) || 0), 0);
   const totalDp = transactions.reduce((acc, item) => acc + (Number(item.dp) || 0), 0);
   const totalSisa = transactions.reduce((acc, item) => acc + (Number(item.sisa) || 0), 0);
-  const totalLunasCount = transactions.filter((item) => item.ket === "Lunas" && (item.jenisJasa || item.price > 0)).length;
-  const totalFilledCount = transactions.filter((item) => item.jenisJasa || item.price > 0).length;
+  const totalLunasCount = transactions.filter((item) => item.ket === "Lunas").length;
 
   const handleSaveNotes = () => {
     onUpdateCatatan(notesInput);
@@ -34,28 +32,14 @@ export function TransactionTable({
     <div className="recap-table-wrapper">
       {/* Table Title Header */}
       <div className="table-top-bar">
-        <div>
-          <h2 className="table-month-header">{monthData.monthName}</h2>
+        <div className="table-title-group">
+          <div className="table-month-badge">
+            <Calendar size={18} color="#059669" />
+            <h2 className="table-month-header">{monthData.monthName}</h2>
+          </div>
           <p className="table-month-sub">
-            Total {totalFilledCount} Transaksi Selesai/Proses ({totalLunasCount} Lunas)
+            Total {transactions.length} transaksi diinput pada bulan ini ({totalLunasCount} Lunas)
           </p>
-        </div>
-        <div className="table-action-buttons">
-          <button
-            onClick={() => exportToCSV(monthData)}
-            className="btn-export-csv"
-            title="Download CSV / Excel"
-          >
-            <FileSpreadsheet size={16} />
-            <span>Export CSV</span>
-          </button>
-
-          {role === "admin" && (
-            <button onClick={onAddRow} className="btn-add-row">
-              <PlusCircle size={16} />
-              <span>Tambah Baris (+1)</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -64,88 +48,89 @@ export function TransactionTable({
         <table className="styled-recap-table">
           <thead>
             <tr>
-              <th style={{ width: "50px" }}>No</th>
-              <th style={{ width: "110px" }}>Tanggal</th>
+              <th style={{ width: "55px", textAlign: "center" }}>No</th>
+              <th style={{ width: "115px" }}>Tanggal</th>
               <th>Jenis Jasa</th>
               <th>Cara Bayar</th>
-              <th style={{ textAlign: "right" }}>Price</th>
-              <th style={{ textAlign: "right" }}>DP</th>
+              <th style={{ textAlign: "right" }}>Price (Rp)</th>
+              <th style={{ textAlign: "right" }}>DP (Rp)</th>
               <th style={{ textAlign: "right" }}>Sisa Pembayaran</th>
               <th style={{ textAlign: "center" }}>Ket (Lunas/Belum)</th>
               <th style={{ width: "120px" }}>Tgl Pelunasan</th>
-              {role === "admin" && <th style={{ textAlign: "center", width: "110px" }}>Aksi</th>}
+              {role === "admin" && <th style={{ textAlign: "center", width: "100px" }}>Aksi</th>}
             </tr>
           </thead>
           <tbody>
-            {transactions.map((trx, idx) => {
-              const isFilled = trx.jenisJasa || trx.price > 0;
-              const isLunas = trx.ket === "Lunas";
+            {transactions.length > 0 ? (
+              transactions.map((trx, idx) => {
+                const isLunas = trx.ket === "Lunas";
 
-              return (
-                <tr key={trx.id || idx} className={!isFilled ? "empty-row" : isLunas ? "row-lunas" : "row-belum"}>
-                  <td style={{ textAlign: "center", fontWeight: "600" }}>{trx.no}</td>
-                  <td>{trx.tanggal || "-"}</td>
-                  <td className="cell-jenis-jasa">
-                    {trx.jenisJasa ? trx.jenisJasa : <span className="placeholder-text">-</span>}
-                  </td>
-                  <td>{trx.caraBayar || "-"}</td>
-                  <td style={{ textAlign: "right" }} className="cell-number">
-                    {trx.price ? formatRupiah(trx.price) : "Rp0"}
-                  </td>
-                  <td style={{ textAlign: "right" }} className="cell-number">
-                    {trx.dp ? formatRupiah(trx.dp) : "Rp0"}
-                  </td>
-                  <td style={{ textAlign: "right" }} className="cell-number cell-sisa">
-                    {formatRupiah(trx.sisa ?? (trx.price - trx.dp))}
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    {isFilled ? (
+                return (
+                  <tr key={trx.id || idx} className={isLunas ? "row-lunas" : "row-belum"}>
+                    <td style={{ textAlign: "center", fontWeight: "700" }}>{trx.no}</td>
+                    <td className="cell-date">{trx.tanggal || "-"}</td>
+                    <td className="cell-jenis-jasa">{trx.jenisJasa || "-"}</td>
+                    <td>{trx.caraBayar || "-"}</td>
+                    <td style={{ textAlign: "right" }} className="cell-number">
+                      {formatRupiah(trx.price)}
+                    </td>
+                    <td style={{ textAlign: "right" }} className="cell-number">
+                      {formatRupiah(trx.dp)}
+                    </td>
+                    <td style={{ textAlign: "right" }} className="cell-number cell-sisa">
+                      {formatRupiah(trx.sisa ?? (trx.price - trx.dp))}
+                    </td>
+                    <td style={{ textAlign: "center" }}>
                       <span className={`status-pill ${isLunas ? "pill-lunas" : "pill-belum"}`}>
                         {trx.ket || "Belum Lunas"}
                       </span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td>{trx.tglPelunasan || "-"}</td>
-                  {role === "admin" && (
-                    <td>
-                      <div className="table-actions-cell">
-                        <button
-                          onClick={() => onEditTransaction(trx)}
-                          className="btn-action-icon edit"
-                          title="Edit Baris"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        {isFilled && !isLunas && (
-                          <button
-                            onClick={() => onQuickToggleLunas(trx)}
-                            className="btn-action-icon lunas"
-                            title="Tandai Lunas"
-                          >
-                            <CheckCircle size={14} />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => onDeleteTransaction(trx.id)}
-                          className="btn-action-icon delete"
-                          title="Hapus Baris"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
                     </td>
-                  )}
-                </tr>
-              );
-            })}
+                    <td className="cell-date">{trx.tglPelunasan || "-"}</td>
+                    {role === "admin" && (
+                      <td>
+                        <div className="table-actions-cell">
+                          <button
+                            onClick={() => onEditTransaction(trx)}
+                            className="btn-action-icon edit"
+                            title="Edit Transaksi (Pop-up)"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          {!isLunas && (
+                            <button
+                              onClick={() => onQuickToggleLunas(trx)}
+                              className="btn-action-icon lunas"
+                              title="Tandai Lunas"
+                            >
+                              <CheckCircle size={14} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => onDeleteTransaction(trx.id)}
+                            className="btn-action-icon delete"
+                            title="Hapus Transaksi Ini"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={role === "admin" ? 10 : 9} className="empty-table-cell">
+                  Belum ada transaksi diinput pada bulan ini. Klik <strong>"Input Transaksi Baru"</strong> untuk menginput data harian.
+                </td>
+              </tr>
+            )}
           </tbody>
           <tfoot>
-            {/* Total Transaksi summary row matching requested design */}
+            {/* Automatic Calculations Summary Row */}
             <tr className="footer-summary-row">
               <td colSpan={4} className="footer-summary-label">
-                Total Transaksi
+                Total Perhitungan Otomatis
               </td>
               <td style={{ textAlign: "right" }} className="cell-summary-val">
                 {formatRupiah(totalPrice)}
@@ -158,7 +143,7 @@ export function TransactionTable({
               </td>
               <td colSpan={role === "admin" ? 3 : 2} className="cell-summary-extra">
                 <span className="summary-badge">
-                  {totalLunasCount} dari {totalFilledCount} Lunas
+                  {totalLunasCount} dari {transactions.length} Transaksi Lunas
                 </span>
               </td>
             </tr>
@@ -166,12 +151,12 @@ export function TransactionTable({
         </table>
       </div>
 
-      {/* Catatan Section (Matching user spec: "catatan: kita nikin rekap perbulan") */}
+      {/* Catatan Perbulan Section */}
       <div className="notes-section">
         <div className="notes-header">
           <div className="notes-title">
             <StickyNote size={18} color="#059669" />
-            <h3>Catatan Rekap Perbulan</h3>
+            <h3>Catatan Rekap Perbulan ({monthData.monthName})</h3>
           </div>
           {role === "admin" && !isEditingNotes && (
             <button onClick={() => { setNotesInput(monthData.catatan || ""); setIsEditingNotes(true); }} className="btn-edit-notes">

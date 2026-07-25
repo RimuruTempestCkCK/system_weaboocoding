@@ -9,18 +9,19 @@ export function AdminDashboard({
   onSaveTransaction,
   onDeleteTransaction,
   onQuickToggleLunas,
-  onAddEmptyRow,
   onUpdateCatatan
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrx, setEditingTrx] = useState(null);
 
   const transactions = monthData?.transactions || [];
+
+  // Automatic calculations for selected month (Current or Past Month)
   const totalPrice = transactions.reduce((acc, t) => acc + (Number(t.price) || 0), 0);
   const totalDp = transactions.reduce((acc, t) => acc + (Number(t.dp) || 0), 0);
   const totalSisa = transactions.reduce((acc, t) => acc + (Number(t.sisa) || 0), 0);
-  const totalLunas = transactions.filter((t) => t.ket === "Lunas" && (t.jenisJasa || t.price > 0)).length;
-  const totalBelum = transactions.filter((t) => t.ket === "Belum Lunas" && (t.jenisJasa || t.price > 0)).length;
+  const totalLunas = transactions.filter((t) => t.ket === "Lunas").length;
+  const totalBelum = transactions.filter((t) => t.ket === "Belum Lunas").length;
 
   const handleOpenAddModal = () => {
     setEditingTrx(null);
@@ -36,7 +37,7 @@ export function AdminDashboard({
     onSaveTransaction(trxData);
   };
 
-  // Next row number
+  // Auto calculate next sequential row number
   const nextNo = transactions.length > 0 ? Math.max(...transactions.map((t) => t.no || 0)) + 1 : 1;
 
   return (
@@ -50,7 +51,7 @@ export function AdminDashboard({
           </div>
           <h2>Kelola Rekap Keuangan Jasa ({monthData?.monthName})</h2>
           <p>
-            Anda memiliki akses penuh untuk menginput, mengedit, menghapus transaksi, dan memperbarui catatan rekap perbulan.
+            Input transaksi harian secara praktis (tanggal otomatis terisi hari ini). Anda juga dapat memilih dan mengedit data transaksi di bulan-bulan lalu.
           </p>
         </div>
         <button onClick={handleOpenAddModal} className="btn-banner-add">
@@ -59,7 +60,7 @@ export function AdminDashboard({
         </button>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards (Automatic Calculations) */}
       <div className="kpi-grid">
         <div className="kpi-card text-emerald">
           <div className="kpi-icon-wrapper icon-emerald">
@@ -68,7 +69,7 @@ export function AdminDashboard({
           <div>
             <span className="kpi-label">Total Omset (Price)</span>
             <h3 className="kpi-value">{formatRupiah(totalPrice)}</h3>
-            <span className="kpi-sub">Total nilai transaksi jasa</span>
+            <span className="kpi-sub">Total nilai transaksi jasa bulan ini</span>
           </div>
         </div>
 
@@ -79,7 +80,7 @@ export function AdminDashboard({
           <div>
             <span className="kpi-label">Total DP Masuk</span>
             <h3 className="kpi-value">{formatRupiah(totalDp)}</h3>
-            <span className="kpi-sub">Uang muka yang diterima</span>
+            <span className="kpi-sub">Uang muka diterima</span>
           </div>
         </div>
 
@@ -113,11 +114,10 @@ export function AdminDashboard({
         onEditTransaction={handleOpenEditModal}
         onDeleteTransaction={onDeleteTransaction}
         onQuickToggleLunas={onQuickToggleLunas}
-        onAddRow={onAddEmptyRow}
         onUpdateCatatan={onUpdateCatatan}
       />
 
-      {/* Modal for Add / Edit */}
+      {/* Ultra Clean Input / Edit Modal */}
       <TransactionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -10,13 +10,13 @@ import { INITIAL_MONTHLY_DATA } from "./initialData";
 export default function App() {
   // Auth state
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("posjasaku_user");
+    const savedUser = localStorage.getItem("weaboocoding_user") || localStorage.getItem("posjasaku_user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
   // Monthly data state
   const [allMonthData, setAllMonthData] = useState(() => {
-    const savedData = localStorage.getItem("posjasaku_recap_data");
+    const savedData = localStorage.getItem("weaboocoding_recap_data") || localStorage.getItem("posjasaku_recap_data");
     return savedData ? JSON.parse(savedData) : INITIAL_MONTHLY_DATA;
   });
 
@@ -31,13 +31,14 @@ export default function App() {
 
   // Sync state to LocalStorage
   useEffect(() => {
-    localStorage.setItem("posjasaku_recap_data", JSON.stringify(allMonthData));
+    localStorage.setItem("weaboocoding_recap_data", JSON.stringify(allMonthData));
   }, [allMonthData]);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("posjasaku_user", JSON.stringify(user));
+      localStorage.setItem("weaboocoding_user", JSON.stringify(user));
     } else {
+      localStorage.removeItem("weaboocoding_user");
       localStorage.removeItem("posjasaku_user");
     }
   }, [user]);
@@ -125,24 +126,6 @@ export default function App() {
     });
   };
 
-  // Add blank row (+1 row)
-  const handleAddEmptyRow = () => {
-    const transactions = currentMonthData?.transactions || [];
-    const nextNo = transactions.length > 0 ? Math.max(...transactions.map((t) => t.no || 0)) + 1 : 1;
-
-    handleSaveTransaction({
-      no: nextNo,
-      tanggal: "",
-      jenisJasa: "",
-      caraBayar: "",
-      price: 0,
-      dp: 0,
-      sisa: 0,
-      ket: "Belum Lunas",
-      tglPelunasan: ""
-    });
-  };
-
   // Update Catatan perbulan
   const handleUpdateCatatan = (newCatatan) => {
     setAllMonthData((prev) => ({
@@ -201,7 +184,6 @@ export default function App() {
               onSaveTransaction={handleSaveTransaction}
               onDeleteTransaction={handleDeleteTransaction}
               onQuickToggleLunas={handleQuickToggleLunas}
-              onAddEmptyRow={handleAddEmptyRow}
               onUpdateCatatan={handleUpdateCatatan}
             />
           ) : (
@@ -211,7 +193,7 @@ export default function App() {
 
         <footer className="clean-footer">
           <div className="footer-content">
-            <p>&copy; 2026 PosJasaku • Sistem Rekapitulasi & Laporan Keuangan Jasa</p>
+            <p>&copy; 2026 WeabooCoding • Sistem Rekapitulasi & Laporan Keuangan Jasa</p>
           </div>
         </footer>
       </div>

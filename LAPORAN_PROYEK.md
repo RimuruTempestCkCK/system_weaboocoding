@@ -1,60 +1,48 @@
-# 📝 Laporan Daftar File & Fitur yang Dibuat
+# 📝 Laporan Proyek & Dokumentasi Sistem WeabooCoding
 
-Dokumen ini berisi daftar lengkap file source code, komponen React, stylesheet, serta utility yang telah dibuat untuk aplikasi **PosJasaku (Rekap & Laporan Keuangan Jasa)**.
+Dokumen ini berisi pencatatan lengkap mengenai arsitektur, daftar komponen, serta seluruh fitur yang telah diperbarui dalam proyek **WeabooCoding (Sistem Rekapitulasi & Laporan Keuangan Jasa berbasis React JS)**.
 
 ---
 
-## 📂 1. Daftar File Utama Proyek
+## 🚀 1. Fitur Utama & Pembaruan Terkini
 
-| Nama File | Lokasi / Path | Deskripsi & Fungsi |
+### 🪟 A. Pop-Up Modal Dialog untuk Input & Edit Transaksi
+- **Mode Input Transaksi Baru**: Membuka **Pop-Up Dialog** interaktif ketika Admin mengeklik tombol `+ Input Transaksi Baru`.
+- **Mode Edit Transaksi**: Membuka **Pop-Up Dialog** yang terisi otomatis dengan data baris yang sedang diedit ketika Admin mengeklik ikon `Edit` pada tabel rekapitulasi.
+- **Navigasi Pop-Up**: Mendukung *Backdrop Click Close* dan penekanan tombol `Esc` untuk menutup pop-up.
+- **Kalkulasi Otomatis (Realtime)**: Otomatis menghitung `Sisa Pembayaran = Price - DP` saat mengetik angka nominal dan menentukan status `Lunas` bila sisa pembayaran bernilai Rp0.
+- **Tanggal Otomatis Hari Ini**: Tanggal transaksi secara otomatis terisi dengan tanggal hari login Admin (misal: `2026-07-25`).
+
+### 📅 B. Input Harian & Fleksibilitas Edit Bulan Lalu
+- **Switching Bulan**: Admin dan Owner dapat berpindah ke bulan apa saja (*Juli 2026*, *Juni 2026 (Bulan Lalu)*, *Mei 2026*, dll) melalui *Month Selector* pada Sidebar & Navbar.
+- **Edit Bulan Lalu**: Admin dapat menambah, mengubah, atau menghapus transaksi pada bulan-bulan lalu secara bebas.
+- **Bebas Tanpa Baris Kosong Dummy**: Tabel rekapitulasi hanya menampilkan transaksi aktif yang benar-benar terisi tanpa ada tombol *tambah baris kosong*.
+
+---
+
+## 📂 2. Daftar File & Komponen Terupdate
+
+| Nama File | Path File | Fungsi & Peran Komponen |
 | :--- | :--- | :--- |
-| **`App.jsx`** | `src/App.jsx` | Component utama (Root) yang menangani state data bulanan, autentikasi user, routing role Admin/Owner, serta integrasi `localStorage`. |
-| **`Navbar.jsx`** | `src/components/Navbar.jsx` | Header navigasi atas yang berisi logo, pemilih bulan rekap (*Month Selector*), badge role aktif, dan tombol Logout. |
-| **`LoginPage.jsx`** | `src/components/LoginPage.jsx` | Halaman login dengan form kredensial dan tombol **1-Click Quick Demo Login** untuk Admin dan Owner. |
-| **`AdminDashboard.jsx`** | `src/components/AdminDashboard.jsx` | Dashboard khusus **Admin** untuk menginput, mengedit, menghapus transaksi, melihat ringkasan omset, dan mengedit catatan perbulan. |
-| **`OwnerDashboard.jsx`** | `src/components/OwnerDashboard.jsx` | Dashboard khusus **Owner** (Read-Only) yang dilengkapi dengan grafik visual Recharts (Bar Chart & Donut Chart) serta ringkasan KPI. |
-| **`TransactionTable.jsx`**| `src/components/TransactionTable.jsx` | Component tabel rekapitulasi utama yang menampilkan seluruh baris transaksi, kalkulasi total transaksi, dan area catatan perbulan. |
-| **`TransactionModal.jsx`**| `src/components/TransactionModal.jsx` | Form modal interaktif untuk menambah atau mengubah data baris transaksi dengan kalkulasi sisa pembayaran otomatis. |
-| **`AddMonthModal.jsx`** | `src/components/AddMonthModal.jsx` | Form modal untuk membuat lembar rekapitulasi bulan baru (contoh: *Agustus 2026*). |
-| **`initialData.js`** | `src/initialData.js` | Dataset awal yang memuat rekap transaksi bulan **Juli 2026** (sesuai contoh user) dan data kredensial login demo. |
-| **`exportUtils.js`** | `src/utils/exportUtils.js` | Helper utility untuk format mata uang Rupiah (`IDR`) serta fungsi export data ke file **CSV / Excel**. |
-| **`index.css`** | `src/index.css` | File styling utama berbasis Vanilla CSS modern dengan tema glassmorphism, responsive grid, status badge, dan print layout. |
-| **`vite.config.js`** | `vite.config.js` | Konfigurasi bundler Vite yang telah disesuaikan agar kompatibel dengan lingkungan Windows & Vercel build. |
-| **`vercel.json`** | `vercel.json` | File konfigurasi rewrite SPA untuk memastikan aplikasi berjalan tanpa error 404 saat di-deploy ke Vercel. |
-| **`package.json`** | `package.json` | Konfigurasi dependensi npm (`react`, `react-dom`, `lucide-react`, `recharts`, `vite`). |
+| **`TransactionModal.jsx`** | `src/components/TransactionModal.jsx` | **Pop-Up Dialog** utama untuk Input & Edit transaksi. Dilengkapi 3 blok section interaktif, live format Rupiah, & auto calc. |
+| **`TransactionTable.jsx`** | `src/components/TransactionTable.jsx` | Tabel rekapitulasi transaksi harian. Menangani aksi trigger **Pop-Up Edit**, Tandai Lunas, Hapus, & Ringkasan Perhitungan Otomatis. |
+| **`AdminDashboard.jsx`** | `src/components/AdminDashboard.jsx` | Dashboard pengelola untuk **Admin**. Memiliki tombol trigger **Pop-Up Input Transaksi Baru** & KPI Card summary. |
+| **`OwnerDashboard.jsx`** | `src/components/OwnerDashboard.jsx` | Dashboard **Owner (Read-Only)** dengan analisis grafik Recharts (*Bar Chart & Donut Chart*) serta fitur Cetak PDF. |
+| **`Navbar.jsx`** | `src/components/Navbar.jsx` | Header topbar clean dengan tombol toggle sidebar, breadcrumb, quick month selector, & logout. |
+| **`Sidebar.jsx`** | `src/components/Sidebar.jsx` | Left Sidebar collapsible dengan menu navigasi, role indicator, pemilih bulan, & profil pengguna. |
+| **`LoginPage.jsx`** | `src/components/LoginPage.jsx` | Halaman Login ultra-clean dengan tab switcher role & tombol 1-Click Quick Demo Login. |
+| **`App.jsx`** | `src/App.jsx` | Root Layout yang mengelola state data transaksi, role routing, & penyimpanan otomatis ke `localStorage`. |
+| **`initialData.js`** | `src/initialData.js` | Dataset awal terstruktur yang mencakup bulan berjalan (*Juli 2026*) serta bulan lalu (*Juni 2026*, *Mei 2026*). |
+| **`exportUtils.js`** | `src/utils/exportUtils.js` | Helper utility format mata uang Rupiah (`IDR`). |
+| **`index.css`** | `src/index.css` | Styling utama Vanilla CSS dengan animasi `@keyframes popUpScale`, glassmorphism backdrop, & print styles. |
+| **`vercel.json`** | `vercel.json` | Konfigurasi SPA rewrite rules untuk deployment tanpa error 404 di Vercel. |
 
 ---
 
-## 📊 2. Struktur Data Tabel Rekapitulasi
+## 📊 3. Ringkasan Perhitungan Otomatis
 
-Tabel rekapitulasi keuangan disusun dengan 9 kolom data berikut:
-
-1. **No**: Nomor urut transaksi (1, 2, 3, dst.)
-2. **Tanggal**: Tanggal transaksi dilaksanakan
-3. **Jenis jasa**: Nama layanan / proyek jasa
-4. **Cara bayar**: Metode pembayaran (*Transfer BCA, Mandiri, QRIS, Cash*)
-5. **Price**: Total biaya jasa (Format Rupiah)
-6. **DP**: Down Payment / Uang muka (Format Rupiah)
-7. **Sisa pembayaran**: Calculated Field (`Price - DP`)
-8. **Ket (Lunas/belum)**: Status pelunasan (*Lunas* / *Belum Lunas*)
-9. **Tgl pelunasan**: Tanggal ketika sisa pembayaran dilunasi
-10. **Catatan perbulan**: Area catatan bulanan di bagian bawah tabel.
-
----
-
-## 🛠️ 3. Perbedaan Fitur Berdasarkan Role
-
-### 🛡️ Role Admin:
-- Can Add / Edit / Delete transaction rows.
-- Can Quick-mark transactions as "Lunas".
-- Can add new blank rows (+1).
-- Can edit monthly notes (*Catatan perbulan*).
-- Can create new monthly recap sheets.
-
-### 👁️ Role Owner:
-- Read-only view for tables and monthly notes.
-- Executive KPI Cards (Total Omset, DP Received, Piutang, % Pelunasan).
-- Interactive Charts:
-  - *Price vs DP vs Sisa Bar Chart*.
-  - *Lunas vs Belum Lunas Donut Chart*.
-- Export data to **CSV / Excel** and Print **PDF**.
+1. **Sisa Pembayaran**: `Price` dikurangi `DP`.
+2. **Status Pelunasan**: Bernilai `Lunas` apabila Sisa Pembayaran `≤ 0`, dan `Belum Lunas` bila masih ada sisa piutang.
+3. **Total Omset Pendapatan**: Penjumlahan seluruh nominal `Price` pada bulan yang dipilih.
+4. **Total DP Masuk**: Penjumlahan seluruh nominal `DP` yang diterima.
+5. **Total Piutang Berjalan**: Penjumlahan seluruh nominal `Sisa Pembayaran` yang belum dilunasi.

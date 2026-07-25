@@ -53,7 +53,7 @@ export function LoginPage({ onLogin }) {
           <div className="clean-brand-logo">
             <Sparkles size={24} color="#059669" />
           </div>
-          <h2>PosJasaku</h2>
+          <h2>WeabooCoding</h2>
           <p>Portal Rekapitulasi & Laporan Keuangan Jasa</p>
         </div>
 
@@ -143,7 +143,7 @@ export function LoginPage({ onLogin }) {
         </div>
 
         <div className="clean-login-footer">
-          <p>&copy; 2026 PosJasaku • System Rekap Perbulan Ready for Vercel</p>
+          <p>&copy; 2026 WeabooCoding • System Rekap Perbulan Ready for Vercel</p>
         </div>
       </div>
     </div>

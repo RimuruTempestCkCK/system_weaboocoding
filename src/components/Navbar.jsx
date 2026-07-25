@@ -20,7 +20,7 @@ export function Navbar({
         </button>
 
         <div className="navbar-breadcrumb">
-          <span className="bc-parent">PosJasaku</span>
+          <span className="bc-parent">WeabooCoding</span>
           <ChevronRight size={14} className="bc-separator" />
           <span className="bc-current">{currentMonthName}</span>
         </div>

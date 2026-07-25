@@ -6,14 +6,12 @@ import {
   Eye,
   Calendar,
   PlusCircle,
-  FileSpreadsheet,
   Printer,
   LogOut,
   RotateCcw,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { exportToCSV } from "../utils/exportUtils";
 
 export function Sidebar({
   user,
@@ -23,7 +21,6 @@ export function Sidebar({
   onAddMonthClick,
   onLogout,
   onResetData,
-  monthData,
   isCollapsed,
   onToggleCollapse
 }) {
@@ -38,7 +35,7 @@ export function Sidebar({
         </div>
         {!isCollapsed && (
           <div className="brand-text">
-            <h2>PosJasaku</h2>
+            <h2>WeabooCoding</h2>
             <span className="brand-tagline">Rekap Keuangan</span>
           </div>
         )}
@@ -94,14 +91,6 @@ export function Sidebar({
           <LayoutDashboard size={18} />
           {!isCollapsed && <span>Dashboard & Rekap</span>}
         </div>
-
-        <button
-          onClick={() => exportToCSV(monthData)}
-          className="sidebar-nav-item nav-button"
-        >
-          <FileSpreadsheet size={18} />
-          {!isCollapsed && <span>Export CSV / Excel</span>}
-        </button>
 
         {isOwner && (
           <button onClick={() => window.print()} className="sidebar-nav-item nav-button">
