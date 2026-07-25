@@ -3,6 +3,7 @@ import { ShieldCheck, Eye, Lock, User, ArrowRight, Sparkles } from "lucide-react
 import { MOCK_USERS } from "../initialData";
 import { authenticateUserFromSupabase } from "../utils/supabaseService";
 import { getSupabaseCredentials } from "../utils/supabaseClient";
+import { showAlertError } from "../utils/alertUtils";
 
 export function LoginPage({ onLogin }) {
   const [selectedRole, setSelectedRole] = useState("admin"); // 'admin' or 'owner'
@@ -48,7 +49,9 @@ export function LoginPage({ onLogin }) {
     if (foundUser) {
       onLogin(foundUser);
     } else {
-      setErrorMsg("Username atau password salah! Silakan periksa kembali.");
+      const msg = "Username atau password salah! Silakan periksa kembali credential Anda.";
+      setErrorMsg(msg);
+      showAlertError("Gagal Masuk", msg);
     }
   };
 

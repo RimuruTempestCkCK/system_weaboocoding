@@ -3,6 +3,7 @@ import { Database, CheckCircle2, AlertCircle, X, Save, Copy, RefreshCw, Server, 
 import { getSupabaseCredentials, reinitSupabaseClient } from "../utils/supabaseClient";
 import { seedInitialDataToSupabase, seedInitialUsersToSupabase, fetchAllMonthDataFromSupabase } from "../utils/supabaseService";
 import { INITIAL_MONTHLY_DATA, MOCK_USERS } from "../initialData";
+import { showConfirmAction, showAlertSuccess, showAlertError, showToastSuccess, showToastInfo } from "../utils/alertUtils";
 
 export function SupabaseConfigModal({ isOpen, onClose, onConfigSaved }) {
   const [url, setUrl] = useState("");
@@ -43,28 +44,41 @@ export function SupabaseConfigModal({ isOpen, onClose, onConfigSaved }) {
           await seedInitialDataToSupabase(INITIAL_MONTHLY_DATA);
         }
         
+        showAlertSuccess("Terkoneksi ke Supabase Cloud", "Kredensial database berhasil dikonfigurasi dan disinkronkan.");
+
         if (onConfigSaved) {
           onConfigSaved();
         }
       } else {
         setIsSaved(false);
         setStatusMsg("Project URL atau Anon Key tidak boleh kosong.");
+        showAlertError("Kredensial Tidak Lengkap", "Silakan isi Supabase Project URL dan Anon Key.");
       }
     } catch (err) {
       console.error(err);
       setStatusMsg("Gagal mengonfirmasi koneksi Supabase: " + err.message);
+      showAlertError("Gagal Terhubung", err.message || "Periksa kembali URL & Anon Key Supabase Anda.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResetCreds = () => {
-    if (window.confirm("Apakah Anda yakin ingin memutus koneksi Supabase? Aplikasi akan beralih ke penyimpanan lokal browser.")) {
+  const handleResetCreds = async () => {
+    const confirmed = await showConfirmAction({
+      title: "Putus Koneksi Supabase?",
+      text: "Aplikasi akan kembali ke mode penyimpanan lokal browser (LocalStorage).",
+      confirmButtonText: "Ya, Putus Koneksi",
+      cancelButtonText: "Batal",
+      icon: "warning"
+    });
+
+    if (confirmed) {
       reinitSupabaseClient("", "");
       setUrl("");
       setAnonKey("");
       setIsSaved(false);
       setStatusMsg("Kredensial Supabase dihapus. Menggunakan storage lokal.");
+      showToastInfo("Koneksi Diputus", "Beralih ke penyimpanan lokal browser.");
       if (onConfigSaved) onConfigSaved();
     }
   };

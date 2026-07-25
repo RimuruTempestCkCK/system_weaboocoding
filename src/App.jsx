@@ -8,6 +8,7 @@ import { AddMonthModal } from "./components/AddMonthModal";
 import { SupabaseConfigModal } from "./components/SupabaseConfigModal";
 import { INITIAL_MONTHLY_DATA } from "./initialData";
 import { getSupabaseCredentials } from "./utils/supabaseClient";
+import { showConfirmDelete, showConfirmAction, showToastSuccess, showToastInfo } from "./utils/alertUtils";
 import {
   fetchAllMonthDataFromSupabase,
   saveTransactionToSupabase,
@@ -86,17 +87,38 @@ export default function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
+    showToastSuccess("Berhasil Masuk", `Selamat datang, ${userData.name}!`);
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    const confirmed = await showConfirmAction({
+      title: "Keluar dari Aplikasi?",
+      text: "Anda akan keluar dari sesi pengguna saat ini.",
+      confirmButtonText: "Ya, Keluar",
+      cancelButtonText: "Batal",
+      icon: "question"
+    });
+
+    if (confirmed) {
+      setUser(null);
+      showToastInfo("Sesi Diakhiri", "Anda telah berhasil keluar.");
+    }
   };
 
   // Reset data to initial sample
-  const handleResetData = () => {
-    if (window.confirm("Apakah Anda yakin ingin mengembalikan data ke sampel awal (Juli 2026)?")) {
+  const handleResetData = async () => {
+    const confirmed = await showConfirmAction({
+      title: "Reset Sampel Data?",
+      text: "Apakah Anda yakin ingin mengembalikan data ke sampel awal (Juli 2026)? Perubahan lokal akan disetel ulang.",
+      confirmButtonText: "Ya, Reset Sampel Data",
+      cancelButtonText: "Batal",
+      icon: "warning"
+    });
+
+    if (confirmed) {
       setAllMonthData(INITIAL_MONTHLY_DATA);
       setSelectedMonthKey("2026-07");
+      showToastSuccess("Data Di-reset", "Data berhasil dikembalikan ke sampel awal.");
     }
   };
 
@@ -150,7 +172,8 @@ export default function App() {
   // Delete Transaction
   const handleDeleteTransaction = async (trxId) => {
     if (!currentMonthData) return;
-    if (!window.confirm("Hapus baris transaksi ini?")) return;
+    const confirmed = await showConfirmDelete("Hapus Transaksi?", "Apakah Anda yakin ingin menghapus data transaksi ini?");
+    if (!confirmed) return;
 
     if (isSupabaseActive) {
       await deleteTransactionFromSupabase(trxId);
@@ -167,6 +190,8 @@ export default function App() {
         }
       };
     });
+
+    showToastSuccess("Transaksi Dihapus", "Data transaksi telah dihapus dari rekap.");
   };
 
   // Quick Mark as Lunas
@@ -178,6 +203,7 @@ export default function App() {
       tglPelunasan: trx.tglPelunasan || todayStr,
       sisa: 0
     });
+    showToastSuccess("Status Lunas", `Transaksi No. ${trx.no} berhasil ditandai Lunas!`);
   };
 
   // Update Catatan perbulan
@@ -193,6 +219,8 @@ export default function App() {
         catatan: newCatatan
       }
     }));
+
+    showToastSuccess("Catatan Diperbarui", "Catatan rekap bulan berhasil disimpan.");
   };
 
   // Add new Month recap

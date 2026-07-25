@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Save, Calendar, FileText, DollarSign, CheckCircle2 } from "lucide-react";
 import { formatRupiah } from "../utils/exportUtils";
+import { showToastSuccess, showAlertError } from "../utils/alertUtils";
 
 export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultNo }) {
   // Helper to get local date string YYYY-MM-DD
@@ -109,6 +110,15 @@ export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultN
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.jenisJasa.trim()) {
+      showAlertError("Data Belum Lengkap", "Silakan isi Jenis Jasa / Layanan terlebih dahulu.");
+      return;
+    }
+    if (!formData.price || priceNum <= 0) {
+      showAlertError("Nominal Tidak Valid", "Silakan masukkan Harga Total (Price) yang lebih dari 0.");
+      return;
+    }
+
     onSave({
       ...formData,
       no: Number(formData.no),
@@ -116,6 +126,10 @@ export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultN
       dp: dpNum,
       sisa: sisaNum
     });
+    showToastSuccess(
+      initialTrx ? "Perubahan Disimpan" : "Transaksi Disimpan",
+      initialTrx ? `Transaksi No. ${formData.no} diperbarui!` : `Transaksi No. ${formData.no} berhasil disimpan.`
+    );
     onClose();
   };
 
@@ -124,15 +138,20 @@ export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultN
       <div className="popup-card-dialog" onClick={(e) => e.stopPropagation()}>
         {/* Pop-Up Header */}
         <div className="popup-header">
-          <div>
-            <h3 className="popup-title">
-              {initialTrx ? `Edit Transaksi (No. ${formData.no})` : `Input Transaksi Harian Baru`}
-            </h3>
-            <p className="popup-subtitle">
-              {initialTrx
-                ? "Perbarui detail transaksi atau status pelunasan"
-                : `Form input transaksi (Tanggal otomatis: ${formData.tanggal})`}
-            </p>
+          <div className="popup-header-title-flex">
+            <div className="popup-icon-badge">
+              <FileText size={22} color="#059669" />
+            </div>
+            <div>
+              <h3 className="popup-title">
+                {initialTrx ? `Edit Transaksi (No. ${formData.no})` : `Input Transaksi Harian Baru`}
+              </h3>
+              <p className="popup-subtitle">
+                {initialTrx
+                  ? "Perbarui detail transaksi, nominal DP, atau status pelunasan"
+                  : `Form input transaksi (Tanggal otomatis: ${formData.tanggal})`}
+              </p>
+            </div>
           </div>
           <button onClick={onClose} className="popup-close-btn" title="Tutup Modal (Esc)">
             <X size={20} />
