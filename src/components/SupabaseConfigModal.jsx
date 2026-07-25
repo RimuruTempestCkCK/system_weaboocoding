@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Database, CheckCircle2, AlertCircle, X, Save, Copy, RefreshCw, Server } from "lucide-react";
+import { Database, CheckCircle2, AlertCircle, X, Save, Copy, RefreshCw, Server, Unplug, ShieldCheck } from "lucide-react";
 import { getSupabaseCredentials, reinitSupabaseClient } from "../utils/supabaseClient";
 import { seedInitialDataToSupabase, seedInitialUsersToSupabase, fetchAllMonthDataFromSupabase } from "../utils/supabaseService";
 import { INITIAL_MONTHLY_DATA, MOCK_USERS } from "../initialData";
@@ -35,7 +35,7 @@ export function SupabaseConfigModal({ isOpen, onClose, onConfigSaved }) {
         setIsSaved(true);
         setStatusMsg("Berhasil menyimpan kredensial Supabase!");
         
-        // Seed users & data
+        // Seed users & initial data
         await seedInitialUsersToSupabase(MOCK_USERS);
         const remoteData = await fetchAllMonthDataFromSupabase();
         if (!remoteData || Object.keys(remoteData).length === 0) {
@@ -59,16 +59,21 @@ export function SupabaseConfigModal({ isOpen, onClose, onConfigSaved }) {
   };
 
   const handleResetCreds = () => {
-    reinitSupabaseClient("", "");
-    setUrl("");
-    setAnonKey("");
-    setIsSaved(false);
-    setStatusMsg("Kredensial Supabase dihapus.");
-    if (onConfigSaved) onConfigSaved();
+    if (window.confirm("Apakah Anda yakin ingin memutus koneksi Supabase? Aplikasi akan beralih ke penyimpanan lokal browser.")) {
+      reinitSupabaseClient("", "");
+      setUrl("");
+      setAnonKey("");
+      setIsSaved(false);
+      setStatusMsg("Kredensial Supabase dihapus. Menggunakan storage lokal.");
+      if (onConfigSaved) onConfigSaved();
+    }
   };
 
   const handleCopySql = () => {
-    const sqlScript = `-- SCRIPT SETUP SUPABASE WEABOOCODING
+    const sqlScript = `-- ======================================================
+-- SCRIPT SETUP DATABASE WEABOOCODING UNTUK SUPABASE
+-- ======================================================
+-- 1. Tabel Rekap Bulanan
 CREATE TABLE IF NOT EXISTS public.recap_months (
   month_key TEXT PRIMARY KEY,
   month_name TEXT NOT NULL,
@@ -76,6 +81,7 @@ CREATE TABLE IF NOT EXISTS public.recap_months (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 2. Tabel Transaksi Harian
 CREATE TABLE IF NOT EXISTS public.transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   month_key TEXT REFERENCES public.recap_months(month_key) ON DELETE CASCADE,
@@ -91,13 +97,30 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3. Tabel Users / Pengguna
+CREATE TABLE IF NOT EXISTS public.app_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'admin',
+  email TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Enable RLS & Allow Public Access
 ALTER TABLE public.recap_months ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_users ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read for recap_months" ON public.recap_months FOR SELECT USING (true);
 CREATE POLICY "Allow public insert/update for recap_months" ON public.recap_months FOR ALL USING (true);
+
 CREATE POLICY "Allow public read for transactions" ON public.transactions FOR SELECT USING (true);
-CREATE POLICY "Allow public insert/update/delete for transactions" ON public.transactions FOR ALL USING (true);`;
+CREATE POLICY "Allow public insert/update/delete for transactions" ON public.transactions FOR ALL USING (true);
+
+CREATE POLICY "Allow public read for app_users" ON public.app_users FOR SELECT USING (true);
+CREATE POLICY "Allow public insert/update for app_users" ON public.app_users FOR ALL USING (true);`;
 
     navigator.clipboard.writeText(sqlScript);
     setCopiedSql(true);
@@ -105,104 +128,109 @@ CREATE POLICY "Allow public insert/update/delete for transactions" ON public.tra
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content supabase-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-header-title">
-            <div className="header-icon-circle supabase-icon-bg">
-              <Database size={20} color="#10B981" />
+    <div className="sp-modal-overlay" onClick={onClose}>
+      <div className="sp-modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="sp-modal-header">
+          <div className="sp-modal-title-wrapper">
+            <div className="sp-header-icon-box">
+              <Database size={22} color="#10B981" />
             </div>
             <div>
-              <h3>Konfigurasi Supabase Cloud Database</h3>
-              <p className="modal-subtitle">Integrasi Database PostgreSQL Realtime</p>
+              <div className="sp-header-badge">SUPABASE CLOUD DATABASE</div>
+              <h3 className="sp-header-title">Konfigurasi Database Cloud</h3>
             </div>
           </div>
-          <button className="btn-modal-close" onClick={onClose}>
-            <X size={20} />
+          <button className="sp-btn-close" onClick={onClose} title="Tutup">
+            <X size={18} />
           </button>
         </div>
 
-        <div className="modal-body">
-          {/* Status Indicator */}
-          <div className={`supabase-status-box ${isSaved ? "status-connected" : "status-disconnected"}`}>
-            {isSaved ? (
-              <>
-                <CheckCircle2 size={20} className="status-icon" />
-                <div>
-                  <strong>Terhubung ke Supabase Cloud</strong>
-                  <p>Seluruh data rekap & transaksi tersimpan langsung ke PostgreSQL Supabase.</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <AlertCircle size={20} className="status-icon" />
-                <div>
-                  <strong>Belum Terhubung ke Supabase</strong>
-                  <p>Masukkan Project URL dan Anon Key untuk menghubungkan database Supabase Cloud.</p>
-                </div>
-              </>
-            )}
+        {/* Modal Body */}
+        <div className="sp-modal-body">
+          {/* Status Indicator Card */}
+          <div className={`sp-status-card ${isSaved ? "sp-connected" : "sp-disconnected"}`}>
+            <div className="sp-status-icon-wrap">
+              {isSaved ? <CheckCircle2 size={22} color="#059669" /> : <AlertCircle size={22} color="#d97706" />}
+            </div>
+            <div className="sp-status-text">
+              <div className="sp-status-headline">
+                <strong>{isSaved ? "Terhubung ke Supabase Cloud" : "Database Belum Terhubung"}</strong>
+                {isSaved && <span className="sp-active-pill">LIVE SINKRON</span>}
+              </div>
+              <p>
+                {isSaved
+                  ? "Seluruh transaksi, rekap bulanan, dan akun pengguna tersimpan otomatis ke Supabase PostgreSQL."
+                  : "Masukkan Supabase Project URL dan Anon Key untuk mengaktifkan database realtime."}
+              </p>
+            </div>
           </div>
 
-          {statusMsg && <div className="supabase-alert-msg">{statusMsg}</div>}
+          {/* Toast / Alert Message */}
+          {statusMsg && <div className="sp-alert-banner">{statusMsg}</div>}
 
-          <form onSubmit={handleSave} className="supabase-form">
-            <div className="form-group">
+          {/* Form Credentials */}
+          <form onSubmit={handleSave} className="sp-form-content">
+            <div className="sp-input-group">
               <label htmlFor="sp-url">
-                Supabase Project URL <span className="req">*</span>
+                Supabase Project URL <span className="sp-required">*</span>
               </label>
               <input
                 id="sp-url"
                 type="url"
-                placeholder="https://xyzcompany.supabase.co"
+                placeholder="https://krpyihfukvqxhhwggcft.supabase.co"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="form-control"
+                className="sp-input-field"
                 required
               />
+              <span className="sp-field-hint">Dapat ditemukan di Supabase Dashboard → Project Settings → API</span>
             </div>
 
-            <div className="form-group">
+            <div className="sp-input-group">
               <label htmlFor="sp-key">
-                Supabase Anon / Public API Key <span className="req">*</span>
+                Supabase Anon / Publishable API Key <span className="sp-required">*</span>
               </label>
               <textarea
                 id="sp-key"
-                placeholder="eyJhYmdj... (Anon Public Key)"
+                placeholder="sb_publishable_... atau eyJhbGciOi... (Anon Key)"
                 value={anonKey}
                 onChange={(e) => setAnonKey(e.target.value)}
-                className="form-control code-font"
+                className="sp-input-field sp-code-font"
                 rows={3}
                 required
               />
             </div>
 
-            <div className="supabase-actions">
-              <button type="submit" className="btn-primary" disabled={loading}>
+            <div className="sp-form-actions">
+              <button type="submit" className="sp-btn-submit" disabled={loading}>
                 {loading ? <RefreshCw size={16} className="spin-icon" /> : <Save size={16} />}
                 <span>{loading ? "Menghubungkan..." : "Simpan & Hubungkan"}</span>
               </button>
 
               {isSaved && (
-                <button type="button" onClick={handleResetCreds} className="btn-secondary text-danger">
-                  Putus Koneksi Supabase
+                <button type="button" onClick={handleResetCreds} className="sp-btn-disconnect">
+                  <Unplug size={16} />
+                  <span>Putus Koneksi</span>
                 </button>
               )}
             </div>
           </form>
 
           {/* Quick SQL DDL Section */}
-          <div className="sql-ddl-box">
-            <div className="sql-ddl-header">
-              <Server size={16} />
-              <span>Script SQL DDL (Tabel `recap_months` & `transactions`)</span>
-              <button type="button" onClick={handleCopySql} className="btn-copy-sql">
-                {copiedSql ? <CheckCircle2 size={14} color="#10B981" /> : <Copy size={14} />}
-                <span>{copiedSql ? "Tersalin!" : "Salin SQL"}</span>
+          <div className="sp-sql-container">
+            <div className="sp-sql-header">
+              <div className="sp-sql-title">
+                <Server size={16} color="#059669" />
+                <span>Script Setup SQL DDL</span>
+              </div>
+              <button type="button" onClick={handleCopySql} className="sp-btn-copy-sql">
+                {copiedSql ? <ShieldCheck size={14} color="#10B981" /> : <Copy size={14} />}
+                <span>{copiedSql ? "Tersalin ke Clipboard!" : "Salin Script SQL"}</span>
               </button>
             </div>
-            <p className="sql-hint">
-              Jalankan script SQL ini pada menu <strong>SQL Editor</strong> di dashboard Supabase Anda.
+            <p className="sp-sql-desc">
+              Jalankan script ini di menu <strong>SQL Editor</strong> dashboard Supabase untuk membuat tabel `recap_months`, `transactions`, dan `app_users`.
             </p>
           </div>
         </div>

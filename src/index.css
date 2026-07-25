@@ -1477,105 +1477,332 @@ body {
   color: #f59e0b;
 }
 
-/* SUPABASE MODAL STYLES */
-.supabase-modal {
-  max-width: 540px;
-  width: 90%;
+/* PREMIUM SUPABASE CONFIG MODAL */
+.sp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.supabase-icon-bg {
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sp-modal-card {
+  background: #ffffff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sp-modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sp-header-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.supabase-status-box {
+.sp-header-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #059669;
+  text-transform: uppercase;
+}
+
+.sp-header-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.sp-btn-close {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sp-btn-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.sp-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Status Indicator Card */
+.sp-status-card {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  margin-bottom: 18px;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
   font-size: 0.88rem;
+  line-height: 1.45;
+  transition: all 0.2s;
 }
 
-.supabase-status-box.status-connected {
+.sp-status-card.sp-connected {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
   color: #065f46;
 }
 
-.supabase-status-box.status-disconnected {
+.sp-status-card.sp-disconnected {
   background: #fffbeb;
   border: 1px solid #fde68a;
   color: #92400e;
 }
 
-.status-icon {
-  margin-top: 2px;
+.sp-status-icon-wrap {
+  margin-top: 1px;
   flex-shrink: 0;
 }
 
-.supabase-alert-msg {
-  padding: 10px 14px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.code-font {
-  font-family: monospace, monospace;
-  font-size: 0.82rem;
-}
-
-.supabase-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.sql-ddl-box {
-  margin-top: 24px;
-  padding: 14px;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: var(--radius-md);
-}
-
-.sql-ddl-header {
+.sp-status-headline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
-.btn-copy-sql {
+.sp-status-headline strong {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.sp-active-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #059669;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.05em;
+}
+
+.sp-status-text p {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.sp-alert-banner {
+  padding: 12px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Form Styles */
+.sp-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sp-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sp-input-group label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.sp-required {
+  color: #ef4444;
+}
+
+.sp-input-field {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.sp-input-field:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.sp-code-font {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.sp-field-hint {
+  font-size: 0.73rem;
+  color: #94a3b8;
+}
+
+.sp-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.sp-btn-submit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+.sp-btn-submit:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.sp-btn-disconnect {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 11px 14px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sp-btn-disconnect:hover {
+  background: #fee2e2;
+}
+
+/* SQL Box */
+.sp-sql-container {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sp-sql-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sp-sql-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sp-btn-copy-sql {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
   background: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-family: inherit;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.15s;
 }
 
-.btn-copy-sql:hover {
+.sp-btn-copy-sql:hover {
   background: #f1f5f9;
+  border-color: #94a3b8;
 }
 
-.sql-hint {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.sp-sql-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.4;
 }
 
 .spin-icon {
@@ -1586,4 +1813,5 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
 

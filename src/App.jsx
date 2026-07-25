@@ -175,7 +175,7 @@ export default function App() {
     handleSaveTransaction({
       ...trx,
       ket: "Lunas",
-      tglPelunasan: todayStr,
+      tglPelunasan: trx.tglPelunasan || todayStr,
       sisa: 0
     });
   };

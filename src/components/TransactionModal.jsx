@@ -103,7 +103,7 @@ export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultN
     setFormData((prev) => ({
       ...prev,
       ket: newKet,
-      tglPelunasan: newKet === "Lunas" ? (prev.tglPelunasan || prev.tanggal || getTodayString()) : ""
+      tglPelunasan: newKet === "Lunas" ? (prev.tglPelunasan || prev.tanggal || getTodayString()) : prev.tglPelunasan
     }));
   };
 
@@ -266,7 +266,6 @@ export function TransactionModal({ isOpen, onClose, onSave, initialTrx, defaultN
                 <input
                   type="date"
                   value={formData.tglPelunasan}
-                  disabled={formData.ket !== "Lunas"}
                   onChange={(e) => setFormData({ ...formData, tglPelunasan: e.target.value })}
                 />
               </div>
