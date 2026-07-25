@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { ShieldCheck, Eye, Lock, User, ArrowRight, Sparkles, CheckCircle } from "lucide-react";
+import { ShieldCheck, Eye, Lock, User, ArrowRight, Sparkles } from "lucide-react";
 import { MOCK_USERS } from "../initialData";
+import { authenticateUserFromSupabase } from "../utils/supabaseService";
+import { getSupabaseCredentials } from "../utils/supabaseClient";
 
 export function LoginPage({ onLogin }) {
   const [selectedRole, setSelectedRole] = useState("admin"); // 'admin' or 'owner'
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin123");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRoleTabChange = (role) => {
     setSelectedRole(role);
@@ -20,12 +23,28 @@ export function LoginPage({ onLogin }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+
+    const isSp = getSupabaseCredentials().isConfigured;
+
+    if (isSp) {
+      const spUser = await authenticateUserFromSupabase(username, password);
+      if (spUser) {
+        setLoading(false);
+        onLogin(spUser);
+        return;
+      }
+    }
+
+    // Fallback to local mock users
     const foundUser = MOCK_USERS.find(
       (u) => u.username === username.trim() && u.password === password
     );
 
+    setLoading(false);
     if (foundUser) {
       onLogin(foundUser);
     } else {
@@ -33,7 +52,19 @@ export function LoginPage({ onLogin }) {
     }
   };
 
-  const handleQuickLogin = (role) => {
+  const handleQuickLogin = async (role) => {
+    const defaultUser = role === "admin" ? "admin" : "owner";
+    const defaultPass = role === "admin" ? "admin123" : "owner123";
+
+    const isSp = getSupabaseCredentials().isConfigured;
+    if (isSp) {
+      const spUser = await authenticateUserFromSupabase(defaultUser, defaultPass);
+      if (spUser) {
+        onLogin(spUser);
+        return;
+      }
+    }
+
     const foundUser = MOCK_USERS.find((u) => u.role === role);
     if (foundUser) {
       onLogin(foundUser);

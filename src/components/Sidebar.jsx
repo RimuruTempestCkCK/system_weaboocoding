@@ -10,7 +10,8 @@ import {
   LogOut,
   RotateCcw,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Database
 } from "lucide-react";
 
 export function Sidebar({
@@ -22,7 +23,9 @@ export function Sidebar({
   onLogout,
   onResetData,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isSupabaseConfigured,
+  onOpenSupabaseModal
 }) {
   const isOwner = user?.role === "owner";
 
@@ -83,14 +86,22 @@ export function Sidebar({
         )}
       </div>
 
-      {/* Main Navigation Items */}
-      <nav className="sidebar-nav">
-        {!isCollapsed && <span className="sidebar-section-title">MENU UTAMA</span>}
-
         <div className="sidebar-nav-item active">
           <LayoutDashboard size={18} />
           {!isCollapsed && <span>Dashboard & Rekap</span>}
         </div>
+
+        <button onClick={onOpenSupabaseModal} className="sidebar-nav-item nav-button supabase-item">
+          <Database size={18} color="#10B981" />
+          {!isCollapsed && (
+            <div className="sp-item-text">
+              <span>Supabase Cloud</span>
+              <span className={`sp-status-dot ${isSupabaseConfigured ? "dot-active" : "dot-warning"}`}>
+                {isSupabaseConfigured ? "Terhubung" : "Konfigurasi"}
+              </span>
+            </div>
+          )}
+        </button>
 
         {isOwner && (
           <button onClick={() => window.print()} className="sidebar-nav-item nav-button">
@@ -98,7 +109,6 @@ export function Sidebar({
             {!isCollapsed && <span>Cetak Laporan PDF</span>}
           </button>
         )}
-      </nav>
 
       {/* Sidebar Footer / User Info & Logout */}
       <div className="sidebar-footer">

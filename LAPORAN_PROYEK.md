@@ -6,14 +6,19 @@ Dokumen ini berisi pencatatan lengkap mengenai arsitektur, daftar komponen, sert
 
 ## 🚀 1. Fitur Utama & Pembaruan Terkini
 
-### 🪟 A. Pop-Up Modal Dialog untuk Input & Edit Transaksi
+### ☁️ A. Integrasi Cloud Database (Supabase Ready)
+- **Hybrid Storage Model**: Mendukung **Supabase Cloud Database (PostgreSQL)** secara real-time dan **`localStorage` Browser** sebagai fallback otomatis.
+- **Auto Seeding**: Apabila database Supabase masih kosong, aplikasi secara otomatis melakukan *initial seeding* dataset bawaan.
+- **CRUD Operations**: Seluruh aksi tambah transaksi, edit, hapus, tambah bulan, dan perbarui catatan tersinkronisasi langsung dengan Supabase.
+
+### 🪟 B. Pop-Up Modal Dialog untuk Input & Edit Transaksi
 - **Mode Input Transaksi Baru**: Membuka **Pop-Up Dialog** interaktif ketika Admin mengeklik tombol `+ Input Transaksi Baru`.
 - **Mode Edit Transaksi**: Membuka **Pop-Up Dialog** yang terisi otomatis dengan data baris yang sedang diedit ketika Admin mengeklik ikon `Edit` pada tabel rekapitulasi.
 - **Navigasi Pop-Up**: Mendukung *Backdrop Click Close* dan penekanan tombol `Esc` untuk menutup pop-up.
 - **Kalkulasi Otomatis (Realtime)**: Otomatis menghitung `Sisa Pembayaran = Price - DP` saat mengetik angka nominal dan menentukan status `Lunas` bila sisa pembayaran bernilai Rp0.
 - **Tanggal Otomatis Hari Ini**: Tanggal transaksi secara otomatis terisi dengan tanggal hari login Admin (misal: `2026-07-25`).
 
-### 📅 B. Input Harian & Fleksibilitas Edit Bulan Lalu
+### 📅 C. Input Harian & Fleksibilitas Edit Bulan Lalu
 - **Switching Bulan**: Admin dan Owner dapat berpindah ke bulan apa saja (*Juli 2026*, *Juni 2026 (Bulan Lalu)*, *Mei 2026*, dll) melalui *Month Selector* pada Sidebar & Navbar.
 - **Edit Bulan Lalu**: Admin dapat menambah, mengubah, atau menghapus transaksi pada bulan-bulan lalu secara bebas.
 - **Bebas Tanpa Baris Kosong Dummy**: Tabel rekapitulasi hanya menampilkan transaksi aktif yang benar-benar terisi tanpa ada tombol *tambah baris kosong*.
@@ -24,25 +29,37 @@ Dokumen ini berisi pencatatan lengkap mengenai arsitektur, daftar komponen, sert
 
 | Nama File | Path File | Fungsi & Peran Komponen |
 | :--- | :--- | :--- |
-| **`TransactionModal.jsx`** | `src/components/TransactionModal.jsx` | **Pop-Up Dialog** utama untuk Input & Edit transaksi. Dilengkapi 3 blok section interaktif, live format Rupiah, & auto calc. |
-| **`TransactionTable.jsx`** | `src/components/TransactionTable.jsx` | Tabel rekapitulasi transaksi harian. Menangani aksi trigger **Pop-Up Edit**, Tandai Lunas, Hapus, & Ringkasan Perhitungan Otomatis. |
-| **`AdminDashboard.jsx`** | `src/components/AdminDashboard.jsx` | Dashboard pengelola untuk **Admin**. Memiliki tombol trigger **Pop-Up Input Transaksi Baru** & KPI Card summary. |
-| **`OwnerDashboard.jsx`** | `src/components/OwnerDashboard.jsx` | Dashboard **Owner (Read-Only)** dengan analisis grafik Recharts (*Bar Chart & Donut Chart*) serta fitur Cetak PDF. |
-| **`Navbar.jsx`** | `src/components/Navbar.jsx` | Header topbar clean dengan tombol toggle sidebar, breadcrumb, quick month selector, & logout. |
-| **`Sidebar.jsx`** | `src/components/Sidebar.jsx` | Left Sidebar collapsible dengan menu navigasi, role indicator, pemilih bulan, & profil pengguna. |
+| **`supabaseClient.js`** | `src/utils/supabaseClient.js` | Inisialisasi SDK Supabase Client dengan validasi env variables. |
+| **`supabaseService.js`** | `src/utils/supabaseService.js` | Modul layanan CRUD (Fetch, Upsert, Delete, Catatan, Auto-seed) ke Supabase. |
+| **`SUPABASE_SETUP.sql`** | `SUPABASE_SETUP.sql` | Script SQL DDL siap pakai untuk membuat tabel `recap_months` & `transactions` di Supabase. |
+| **`.env.example`** | `.env.example` | Template variabel lingkungan (`VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY`). |
+| **`TransactionModal.jsx`** | `src/components/TransactionModal.jsx` | **Pop-Up Dialog** utama untuk Input & Edit transaksi. |
+| **`TransactionTable.jsx`** | `src/components/TransactionTable.jsx` | Tabel rekapitulasi transaksi harian dengan aksi Edit, Tandai Lunas, & Hapus. |
+| **`AdminDashboard.jsx`** | `src/components/AdminDashboard.jsx` | Dashboard pengelola untuk **Admin** dengan KPI Card & tombol input. |
+| **`OwnerDashboard.jsx`** | `src/components/OwnerDashboard.jsx` | Dashboard **Owner (Read-Only)** dengan grafik Recharts & Cetak PDF. |
+| **`Navbar.jsx`** | `src/components/Navbar.jsx` | Header topbar clean dengan breadcrumb, quick month selector, & logout. |
+| **`Sidebar.jsx`** | `src/components/Sidebar.jsx` | Left Sidebar collapsible dengan menu navigasi, role indicator, & pemilih bulan. |
 | **`LoginPage.jsx`** | `src/components/LoginPage.jsx` | Halaman Login ultra-clean dengan tab switcher role & tombol 1-Click Quick Demo Login. |
-| **`App.jsx`** | `src/App.jsx` | Root Layout yang mengelola state data transaksi, role routing, & penyimpanan otomatis ke `localStorage`. |
-| **`initialData.js`** | `src/initialData.js` | Dataset awal terstruktur yang mencakup bulan berjalan (*Juli 2026*) serta bulan lalu (*Juni 2026*, *Mei 2026*). |
+| **`App.jsx`** | `src/App.jsx` | Root Layout yang mengelola state data transaksi, sync Supabase, & `localStorage`. |
+| **`initialData.js`** | `src/initialData.js` | Dataset awal terstruktur (*Juli 2026*, *Juni 2026*, *Mei 2026*). |
 | **`exportUtils.js`** | `src/utils/exportUtils.js` | Helper utility format mata uang Rupiah (`IDR`). |
-| **`index.css`** | `src/index.css` | Styling utama Vanilla CSS dengan animasi `@keyframes popUpScale`, glassmorphism backdrop, & print styles. |
-| **`vercel.json`** | `vercel.json` | Konfigurasi SPA rewrite rules untuk deployment tanpa error 404 di Vercel. |
 
 ---
 
-## 📊 3. Ringkasan Perhitungan Otomatis
+## 🛠️ 3. Panduan Menghubungkan Supabase Cloud
 
-1. **Sisa Pembayaran**: `Price` dikurangi `DP`.
-2. **Status Pelunasan**: Bernilai `Lunas` apabila Sisa Pembayaran `≤ 0`, dan `Belum Lunas` bila masih ada sisa piutang.
-3. **Total Omset Pendapatan**: Penjumlahan seluruh nominal `Price` pada bulan yang dipilih.
-4. **Total DP Masuk**: Penjumlahan seluruh nominal `DP` yang diterima.
-5. **Total Piutang Berjalan**: Penjumlahan seluruh nominal `Sisa Pembayaran` yang belum dilunasi.
+1. **Buat Proyek Supabase**: Masuk ke [supabase.com](https://supabase.com) dan buat proyek baru.
+2. **Jalankan Script SQL**:
+   - Buka menu **SQL Editor** di Dashboard Supabase.
+   - Copy & paste isi file [`SUPABASE_SETUP.sql`](file:///D:/DOWNLOAD%20FOLDER/system_weaboocoding/SUPABASE_SETUP.sql).
+   - Klik tombol **Run**.
+3. **Salin API Keys**:
+   - Buka **Project Settings** -> **API**.
+   - Salin **Project URL** dan **anon public key**.
+4. **Buat File `.env`**:
+   - Buat file `.env` di root folder proyek dan isi:
+     ```env
+     VITE_SUPABASE_URL=https://your-project-id.supabase.co
+     VITE_SUPABASE_ANON_KEY=your-anon-key-here
+     ```
+5. **Vercel Deployment**: Tambahkan dua *Environment Variables* di atas pada menu Settings Vercel saat deploy.

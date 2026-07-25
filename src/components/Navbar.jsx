@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Calendar, ShieldCheck, Eye, LogOut, ChevronRight } from "lucide-react";
+import { Menu, Calendar, ShieldCheck, Eye, LogOut, ChevronRight, Database } from "lucide-react";
 
 export function Navbar({
   user,
@@ -7,7 +7,9 @@ export function Navbar({
   monthDataList,
   onSelectMonth,
   onLogout,
-  onToggleSidebar
+  onToggleSidebar,
+  isSupabaseConfigured,
+  onOpenSupabaseModal
 }) {
   const currentMonthName = monthDataList[selectedMonthKey]?.monthName || "Rekap Bulanan";
   const isOwner = user?.role === "owner";
@@ -27,6 +29,16 @@ export function Navbar({
       </div>
 
       <div className="navbar-right">
+        {/* Supabase Status Indicator & Config Trigger */}
+        <button
+          onClick={onOpenSupabaseModal}
+          className={`supabase-nav-badge ${isSupabaseConfigured ? "sp-connected" : "sp-disconnected"}`}
+          title="Konfigurasi Supabase Cloud Database"
+        >
+          <Database size={14} />
+          <span>{isSupabaseConfigured ? "Supabase Active" : "Ke Supabase"}</span>
+        </button>
+
         {/* Quick Month Switcher in Navbar */}
         <div className="quick-month-badge">
           <Calendar size={16} color="#059669" />
@@ -58,3 +70,4 @@ export function Navbar({
     </header>
   );
 }
+

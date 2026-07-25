@@ -1403,3 +1403,187 @@ body {
   .owner-banner { background: #ffffff !important; color: #000000 !important; border: 1px solid #000000; box-shadow: none !important; }
   .recap-table-wrapper { box-shadow: none !important; border: none !important; padding: 0 !important; }
 }
+
+/* SUPABASE BADGES & CONFIG MODAL */
+.supabase-nav-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.supabase-nav-badge.sp-connected {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.supabase-nav-badge.sp-connected:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.supabase-nav-badge.sp-disconnected {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.supabase-nav-badge.sp-disconnected:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.nav-button.supabase-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.nav-button.supabase-item:hover {
+  background: var(--sidebar-hover);
+}
+
+.sp-item-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sp-status-dot {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.sp-status-dot.dot-active {
+  color: #10b981;
+}
+
+.sp-status-dot.dot-warning {
+  color: #f59e0b;
+}
+
+/* SUPABASE MODAL STYLES */
+.supabase-modal {
+  max-width: 540px;
+  width: 90%;
+}
+
+.supabase-icon-bg {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.supabase-status-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+  font-size: 0.88rem;
+}
+
+.supabase-status-box.status-connected {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.supabase-status-box.status-disconnected {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.status-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.supabase-alert-msg {
+  padding: 10px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.code-font {
+  font-family: monospace, monospace;
+  font-size: 0.82rem;
+}
+
+.supabase-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.sql-ddl-box {
+  margin-top: 24px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+}
+
+.sql-ddl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.btn-copy-sql {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-sql:hover {
+  background: #f1f5f9;
+}
+
+.sql-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+

@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { Navbar } from "./components/Navbar";
 import { LoginPage } from "./components/LoginPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { OwnerDashboard } from "./components/OwnerDashboard";
 import { AddMonthModal } from "./components/AddMonthModal";
+import { SupabaseConfigModal } from "./components/SupabaseConfigModal";
 import { INITIAL_MONTHLY_DATA } from "./initialData";
+import { getSupabaseCredentials } from "./utils/supabaseClient";
+import {
+  fetchAllMonthDataFromSupabase,
+  saveTransactionToSupabase,
+  deleteTransactionFromSupabase,
+  updateMonthCatatanInSupabase,
+  createMonthInSupabase,
+  seedInitialDataToSupabase
+} from "./utils/supabaseService";
 
 export default function App() {
   // Auth state
@@ -29,7 +39,13 @@ export default function App() {
   // Add Month Modal state
   const [isAddMonthModalOpen, setIsAddMonthModalOpen] = useState(false);
 
-  // Sync state to LocalStorage
+  // Supabase Config Modal state
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+
+  // Active Supabase Configured State
+  const [isSupabaseActive, setIsSupabaseActive] = useState(() => getSupabaseCredentials().isConfigured);
+
+  // Sync state to LocalStorage as fallback
   useEffect(() => {
     localStorage.setItem("weaboocoding_recap_data", JSON.stringify(allMonthData));
   }, [allMonthData]);
@@ -42,6 +58,31 @@ export default function App() {
       localStorage.removeItem("posjasaku_user");
     }
   }, [user]);
+
+  // Sync data from Supabase
+  const syncWithSupabase = useCallback(async () => {
+    const creds = getSupabaseCredentials();
+    setIsSupabaseActive(creds.isConfigured);
+
+    if (creds.isConfigured) {
+      const remoteData = await fetchAllMonthDataFromSupabase();
+      if (remoteData && Object.keys(remoteData).length > 0) {
+        setAllMonthData(remoteData);
+      } else {
+        // Seed if database is empty
+        await seedInitialDataToSupabase(INITIAL_MONTHLY_DATA);
+        const seededData = await fetchAllMonthDataFromSupabase();
+        if (seededData && Object.keys(seededData).length > 0) {
+          setAllMonthData(seededData);
+        }
+      }
+    }
+  }, []);
+
+  // Initial fetch from Supabase if configured
+  useEffect(() => {
+    syncWithSupabase();
+  }, [syncWithSupabase]);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -63,25 +104,34 @@ export default function App() {
   const currentMonthData = allMonthData[selectedMonthKey] || Object.values(allMonthData)[0];
 
   // Save/Edit Transaction
-  const handleSaveTransaction = (trxData) => {
+  const handleSaveTransaction = async (trxData) => {
     if (!currentMonthData) return;
 
+    let finalTrx = { ...trxData };
+
+    // If Supabase is connected, save to Cloud
+    if (isSupabaseActive) {
+      const savedRemote = await saveTransactionToSupabase(selectedMonthKey, trxData);
+      if (savedRemote && savedRemote.id) {
+        finalTrx.id = savedRemote.id;
+      }
+    } else if (!finalTrx.id) {
+      finalTrx.id = `trx-${Date.now()}`;
+    }
+
     setAllMonthData((prev) => {
-      const monthObj = prev[selectedMonthKey];
+      const monthObj = prev[selectedMonthKey] || {
+        monthName: selectedMonthKey,
+        catatan: "",
+        transactions: []
+      };
       let updatedTransactions = [...monthObj.transactions];
 
-      if (trxData.id) {
-        // Edit existing
-        updatedTransactions = updatedTransactions.map((t) =>
-          t.id === trxData.id ? { ...trxData } : t
-        );
+      const existingIndex = updatedTransactions.findIndex((t) => t.id === finalTrx.id);
+      if (existingIndex >= 0) {
+        updatedTransactions[existingIndex] = finalTrx;
       } else {
-        // Create new
-        const newTrx = {
-          ...trxData,
-          id: `trx-${Date.now()}`
-        };
-        updatedTransactions.push(newTrx);
+        updatedTransactions.push(finalTrx);
       }
 
       // Sort by No
@@ -98,9 +148,13 @@ export default function App() {
   };
 
   // Delete Transaction
-  const handleDeleteTransaction = (trxId) => {
+  const handleDeleteTransaction = async (trxId) => {
     if (!currentMonthData) return;
     if (!window.confirm("Hapus baris transaksi ini?")) return;
+
+    if (isSupabaseActive) {
+      await deleteTransactionFromSupabase(trxId);
+    }
 
     setAllMonthData((prev) => {
       const monthObj = prev[selectedMonthKey];
@@ -127,7 +181,11 @@ export default function App() {
   };
 
   // Update Catatan perbulan
-  const handleUpdateCatatan = (newCatatan) => {
+  const handleUpdateCatatan = async (newCatatan) => {
+    if (isSupabaseActive) {
+      await updateMonthCatatanInSupabase(selectedMonthKey, newCatatan);
+    }
+
     setAllMonthData((prev) => ({
       ...prev,
       [selectedMonthKey]: {
@@ -138,7 +196,11 @@ export default function App() {
   };
 
   // Add new Month recap
-  const handleAddMonth = (newMonthObj) => {
+  const handleAddMonth = async (newMonthObj) => {
+    if (isSupabaseActive) {
+      await createMonthInSupabase(newMonthObj.monthKey, newMonthObj.monthName, newMonthObj.catatan || "");
+    }
+
     setAllMonthData((prev) => ({
       ...prev,
       [newMonthObj.monthKey]: newMonthObj
@@ -164,6 +226,8 @@ export default function App() {
         monthData={currentMonthData}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        isSupabaseConfigured={isSupabaseActive}
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
       />
 
       {/* Right Content Area */}
@@ -175,6 +239,8 @@ export default function App() {
           onSelectMonth={(key) => setSelectedMonthKey(key)}
           onLogout={handleLogout}
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isSupabaseConfigured={isSupabaseActive}
+          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         />
 
         <main className="content-area">
@@ -193,7 +259,7 @@ export default function App() {
 
         <footer className="clean-footer">
           <div className="footer-content">
-            <p>&copy; 2026 WeabooCoding • Sistem Rekapitulasi & Laporan Keuangan Jasa</p>
+            <p>&copy; 2026 WeabooCoding • Sistem Rekapitulasi & Laporan Keuangan Jasa (Supabase Cloud)</p>
           </div>
         </footer>
       </div>
@@ -204,6 +270,14 @@ export default function App() {
         onClose={() => setIsAddMonthModalOpen(false)}
         onAddMonth={handleAddMonth}
       />
+
+      {/* Modal for Supabase Configuration */}
+      <SupabaseConfigModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
+        onConfigSaved={syncWithSupabase}
+      />
     </div>
   );
 }
+
