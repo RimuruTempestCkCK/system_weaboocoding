@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Sidebar } from "./components/Sidebar";
 import { Navbar } from "./components/Navbar";
 import { LoginPage } from "./components/LoginPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { OwnerDashboard } from "./components/OwnerDashboard";
 import { AddMonthModal } from "./components/AddMonthModal";
 import { INITIAL_MONTHLY_DATA } from "./initialData";
-import { RotateCcw } from "lucide-react";
 
 export default function App() {
   // Auth state
@@ -23,10 +23,13 @@ export default function App() {
   // Selected Month Key
   const [selectedMonthKey, setSelectedMonthKey] = useState("2026-07");
 
+  // Sidebar collapse state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   // Add Month Modal state
   const [isAddMonthModalOpen, setIsAddMonthModalOpen] = useState(false);
 
-  // Sync to LocalStorage
+  // Sync state to LocalStorage
   useEffect(() => {
     localStorage.setItem("posjasaku_recap_data", JSON.stringify(allMonthData));
   }, [allMonthData]);
@@ -47,7 +50,7 @@ export default function App() {
     setUser(null);
   };
 
-  // Reset to default dataset
+  // Reset data to initial sample
   const handleResetData = () => {
     if (window.confirm("Apakah Anda yakin ingin mengembalikan data ke sampel awal (Juli 2026)?")) {
       setAllMonthData(INITIAL_MONTHLY_DATA);
@@ -55,7 +58,7 @@ export default function App() {
     }
   };
 
-  // Current selected month data object
+  // Selected month data object
   const currentMonthData = allMonthData[selectedMonthKey] || Object.values(allMonthData)[0];
 
   // Save/Edit Transaction
@@ -165,43 +168,53 @@ export default function App() {
   }
 
   return (
-    <div className="app-layout">
-      {/* Top Header Navbar */}
-      <Navbar
+    <div className="app-shell">
+      {/* Left Sidebar */}
+      <Sidebar
         user={user}
         selectedMonthKey={selectedMonthKey}
         monthDataList={allMonthData}
         onSelectMonth={(key) => setSelectedMonthKey(key)}
-        onLogout={handleLogout}
         onAddMonthClick={() => setIsAddMonthModalOpen(true)}
+        onLogout={handleLogout}
+        onResetData={handleResetData}
+        monthData={currentMonthData}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* Main View switching based on Role */}
-      <main className="main-content">
-        {user.role === "admin" ? (
-          <AdminDashboard
-            monthData={currentMonthData}
-            onSaveTransaction={handleSaveTransaction}
-            onDeleteTransaction={handleDeleteTransaction}
-            onQuickToggleLunas={handleQuickToggleLunas}
-            onAddEmptyRow={handleAddEmptyRow}
-            onUpdateCatatan={handleUpdateCatatan}
-          />
-        ) : (
-          <OwnerDashboard monthData={currentMonthData} />
-        )}
-      </main>
+      {/* Right Content Area */}
+      <div className="main-wrapper">
+        <Navbar
+          user={user}
+          selectedMonthKey={selectedMonthKey}
+          monthDataList={allMonthData}
+          onSelectMonth={(key) => setSelectedMonthKey(key)}
+          onLogout={handleLogout}
+          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
 
-      {/* Bottom Footer & Reset Data Button */}
-      <footer className="app-footer">
-        <div className="footer-container">
-          <p>&copy; 2026 PosJasaku - Sistem Rekapitulasi Keuangan React (Siap Deploy Vercel)</p>
-          <button onClick={handleResetData} className="btn-reset-data" title="Reset Sampel Data">
-            <RotateCcw size={14} />
-            <span>Reset Data Sampel</span>
-          </button>
-        </div>
-      </footer>
+        <main className="content-area">
+          {user.role === "admin" ? (
+            <AdminDashboard
+              monthData={currentMonthData}
+              onSaveTransaction={handleSaveTransaction}
+              onDeleteTransaction={handleDeleteTransaction}
+              onQuickToggleLunas={handleQuickToggleLunas}
+              onAddEmptyRow={handleAddEmptyRow}
+              onUpdateCatatan={handleUpdateCatatan}
+            />
+          ) : (
+            <OwnerDashboard monthData={currentMonthData} />
+          )}
+        </main>
+
+        <footer className="clean-footer">
+          <div className="footer-content">
+            <p>&copy; 2026 PosJasaku • Sistem Rekapitulasi & Laporan Keuangan Jasa</p>
+          </div>
+        </footer>
+      </div>
 
       {/* Modal for creating a new Month Recap */}
       <AddMonthModal

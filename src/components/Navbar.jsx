@@ -1,27 +1,39 @@
 import React from "react";
-import { LogOut, ShieldCheck, Eye, Calendar, Sparkles } from "lucide-react";
+import { Menu, Calendar, ShieldCheck, Eye, LogOut, ChevronRight } from "lucide-react";
 
-export function Navbar({ user, selectedMonthKey, monthDataList, onSelectMonth, onLogout, onAddMonthClick }) {
+export function Navbar({
+  user,
+  selectedMonthKey,
+  monthDataList,
+  onSelectMonth,
+  onLogout,
+  onToggleSidebar
+}) {
+  const currentMonthName = monthDataList[selectedMonthKey]?.monthName || "Rekap Bulanan";
+  const isOwner = user?.role === "owner";
+
   return (
-    <header className="navbar">
-      <div className="navbar-brand">
-        <div className="logo-badge">
-          <Sparkles className="logo-icon" size={22} />
-        </div>
-        <div>
-          <h1 className="brand-title">RekapJasa</h1>
-          <p className="brand-subtitle">Sistem Rekapitulasi & Laporan Keuangan</p>
+    <header className="clean-navbar">
+      <div className="navbar-left">
+        <button onClick={onToggleSidebar} className="btn-toggle-sidebar" title="Toggle Sidebar">
+          <Menu size={20} />
+        </button>
+
+        <div className="navbar-breadcrumb">
+          <span className="bc-parent">PosJasaku</span>
+          <ChevronRight size={14} className="bc-separator" />
+          <span className="bc-current">{currentMonthName}</span>
         </div>
       </div>
 
-      <div className="navbar-actions">
-        {/* Month Selector */}
-        <div className="month-picker-container">
-          <Calendar size={18} className="month-picker-icon" />
+      <div className="navbar-right">
+        {/* Quick Month Switcher in Navbar */}
+        <div className="quick-month-badge">
+          <Calendar size={16} color="#059669" />
           <select
             value={selectedMonthKey}
             onChange={(e) => onSelectMonth(e.target.value)}
-            className="month-picker-select"
+            className="quick-month-select"
           >
             {Object.keys(monthDataList).map((key) => (
               <option key={key} value={key}>
@@ -29,40 +41,19 @@ export function Navbar({ user, selectedMonthKey, monthDataList, onSelectMonth, o
               </option>
             ))}
           </select>
-          {user?.role === "admin" && (
-            <button
-              onClick={onAddMonthClick}
-              className="btn-add-month"
-              title="Buat Rekap Bulan Baru"
-            >
-              + Bulan Baru
-            </button>
-          )}
         </div>
 
-        {/* User Role Badge */}
-        <div className={`role-badge ${user?.role === "admin" ? "badge-admin" : "badge-owner"}`}>
-          {user?.role === "admin" ? (
-            <>
-              <ShieldCheck size={16} />
-              <span>Akses Admin</span>
-            </>
-          ) : (
-            <>
-              <Eye size={16} />
-              <span>Akses Owner (Read-Only)</span>
-            </>
-          )}
+        {/* Clean Role Badge */}
+        <div className={`clean-role-badge ${isOwner ? "role-owner" : "role-admin"}`}>
+          {isOwner ? <Eye size={14} /> : <ShieldCheck size={14} />}
+          <span>{isOwner ? "Owner (Read-Only)" : "Admin"}</span>
         </div>
 
-        {/* User Info & Logout */}
-        <div className="user-profile">
-          <span className="user-name">{user?.name}</span>
-          <button onClick={onLogout} className="btn-logout" title="Keluar">
-            <LogOut size={18} />
-            <span className="btn-logout-text">Keluar</span>
-          </button>
-        </div>
+        {/* Logout Quick Action */}
+        <button onClick={onLogout} className="btn-clean-logout" title="Keluar">
+          <LogOut size={16} />
+          <span className="logout-text">Keluar</span>
+        </button>
       </div>
     </header>
   );
